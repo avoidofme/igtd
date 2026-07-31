@@ -75,8 +75,8 @@ def apply_dracula(image: ImageFile):
             r, g, b = rgb_pixels[x, y]
 
             red_dominance = min(r - g, r - b)
-            green_dominance = min(r - g, r - b)
-            blue_dominance = min(r - g, r - b)
+            green_dominance = min(g - r, g - b)
+            blue_dominance = min(b - r, b - g)
 
             if red_dominance > 20 and r > 50:
                 red_mask_value = int(red_dominance * 1.5)
