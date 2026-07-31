@@ -1,0 +1,134 @@
+import os
+import sys
+
+from PIL import Image, ImageOps
+
+# from PIL import ImageFilter
+from PIL.ImageFile import ImageFile
+
+dracula_theme = {
+    "bg": (40, 42, 54),
+    "mid": (68, 71, 90),
+    "fg": (248, 248, 242),
+    "cyan": (139, 233, 253),
+    "green": (80, 250, 123),
+    "orange": (255, 184, 108),
+    "pink": (255, 121, 198),
+    "purple": (189, 147, 249),
+    "red": (255, 85, 85),
+    "yellow": (241, 250, 140),
+}
+
+
+def apply_dracula(image: ImageFile):
+    rgb_image = image.convert("RGB")
+    rgb_pixels = rgb_image.load()
+
+    grayscale_image = image.convert("L")
+    bnw_image = ImageOps.colorize(
+        grayscale_image,
+        dracula_theme["bg"],
+        dracula_theme["fg"],
+        dracula_theme["purple"],
+        blackpoint=40,
+        whitepoint=242,
+    )
+
+    red_image = ImageOps.colorize(
+        grayscale_image,
+        dracula_theme["bg"],
+        dracula_theme["fg"],
+        dracula_theme["red"],
+        blackpoint=40,
+        whitepoint=242,
+    )
+
+    green_image = ImageOps.colorize(
+        grayscale_image,
+        dracula_theme["bg"],
+        dracula_theme["fg"],
+        dracula_theme["green"],
+        blackpoint=40,
+        whitepoint=242,
+    )
+
+    blue_image = ImageOps.colorize(
+        grayscale_image,
+        dracula_theme["bg"],
+        dracula_theme["fg"],
+        dracula_theme["cyan"],
+        blackpoint=40,
+        whitepoint=242,
+    )
+
+    width, height = bnw_image.size
+
+    red_mask = Image.new("L", (width, height), 0)
+    red_mask_pixels = red_mask.load()
+    green_mask = Image.new("L", (width, height), 0)
+    green_mask_pixels = green_mask.load()
+    blue_mask = Image.new("L", (width, height), 0)
+    blue_mask_pixels = blue_mask.load()
+
+    for y in range(height):
+        for x in range(width):
+            r, g, b = rgb_pixels[x, y]
+
+            red_dominance = min(r - g, r - b)
+            green_dominance = min(r - g, r - b)
+            blue_dominance = min(r - g, r - b)
+
+            if red_dominance > 20 and r > 50:
+                red_mask_value = int(red_dominance * 1.5)
+                red_mask_pixels[x, y] = min(red_mask_value, 255)
+
+            elif green_dominance > 20 and g > 50:
+                green_mask_value = int(green_dominance)
+                green_mask_pixels[x, y] = min(green_mask_value, 255)
+
+            elif blue_dominance > 20 and b > 50:
+                blue_mask_value = int(blue_dominance)
+                blue_mask_pixels[x, y] = min(blue_mask_value, 255)
+
+    # smooth_red_mask = red_mask.filter(ImageFilter.GaussianBlur(1))
+    # smooth_green_mask = green_mask.filter(ImageFilter.GaussianBlur(1))
+    # smooth_blue_mask = blue_mask.filter(ImageFilter.GaussianBlur(1))
+
+    result = Image.composite(red_image, bnw_image, red_mask)
+    result = Image.composite(green_image, result, green_mask)
+    result = Image.composite(blue_image, result, blue_mask)
+
+    return result
+
+
+if __name__ == "__main__":
+    if len(sys.argv) < 2:
+        print(f"Usage: {sys.argv[0]} <path-to-image> [path-to-save-location]")
+        sys.exit(1)
+    input_path = sys.argv[1]
+    try:
+        output_path = sys.argv[2]
+    except IndexError:
+        output_path = "."
+
+    if not os.path.exists(input_path):
+        print(f"Error: {input_path} not found.")
+        sys.exit(1)
+
+    if not os.path.exists(output_path) and not output_path.endswith((".jpg", ".png")):
+        os.makedirs(output_path)
+
+    if os.path.isdir(output_path):
+        base_name = os.path.basename(input_path)
+        output_path = os.path.join(output_path, f"igdt_{base_name}")
+
+    try:
+        image = Image.open(input_path)
+        result = apply_dracula(image)
+        result.save(output_path, "PNG")
+        print(f"Image saved to {output_path} successfully.")
+    except Exception as error:
+        print(f"Error: {error}")
+        import traceback
+
+        traceback.print_exc()
