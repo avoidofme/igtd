@@ -1,14 +1,12 @@
 import os
 import sys
 
-from PIL import Image, ImageOps
-
-# from PIL import ImageFilter
-from PIL.ImageFile import ImageFile
+from PIL import Image, ImageFilter, ImageOps
 
 dracula_theme = {
     "bg": (40, 42, 54),
     "mid": (68, 71, 90),
+    "alt_mid": (98, 114, 164),
     "fg": (248, 248, 242),
     "cyan": (139, 233, 253),
     "green": (80, 250, 123),
@@ -20,7 +18,7 @@ dracula_theme = {
 }
 
 
-def apply_dracula(image: ImageFile):
+def apply_dracula(image):
     rgb_image = image.convert("RGB")
     rgb_pixels = rgb_image.load()
 
@@ -29,9 +27,9 @@ def apply_dracula(image: ImageFile):
         grayscale_image,
         dracula_theme["bg"],
         dracula_theme["fg"],
-        dracula_theme["purple"],
-        blackpoint=40,
-        whitepoint=242,
+        dracula_theme["alt_mid"],
+        blackpoint=10,
+        midpoint=100,
     )
 
     red_image = ImageOps.colorize(
@@ -39,8 +37,7 @@ def apply_dracula(image: ImageFile):
         dracula_theme["bg"],
         dracula_theme["fg"],
         dracula_theme["red"],
-        blackpoint=40,
-        whitepoint=242,
+        blackpoint=10,
     )
 
     green_image = ImageOps.colorize(
@@ -48,8 +45,7 @@ def apply_dracula(image: ImageFile):
         dracula_theme["bg"],
         dracula_theme["fg"],
         dracula_theme["green"],
-        blackpoint=40,
-        whitepoint=242,
+        blackpoint=10,
     )
 
     blue_image = ImageOps.colorize(
@@ -57,8 +53,7 @@ def apply_dracula(image: ImageFile):
         dracula_theme["bg"],
         dracula_theme["fg"],
         dracula_theme["cyan"],
-        blackpoint=40,
-        whitepoint=242,
+        blackpoint=10,
     )
 
     width, height = bnw_image.size
@@ -82,17 +77,17 @@ def apply_dracula(image: ImageFile):
                 red_mask_value = int(red_dominance * 1.5)
                 red_mask_pixels[x, y] = min(red_mask_value, 255)
 
-            elif green_dominance > 20 and g > 50:
-                green_mask_value = int(green_dominance)
+            if green_dominance > 20 and g > 50:
+                green_mask_value = int(green_dominance * 1.5)
                 green_mask_pixels[x, y] = min(green_mask_value, 255)
 
-            elif blue_dominance > 20 and b > 50:
-                blue_mask_value = int(blue_dominance)
+            if blue_dominance > 20 and b > 50:
+                blue_mask_value = int(blue_dominance * 1.5)
                 blue_mask_pixels[x, y] = min(blue_mask_value, 255)
 
-    # smooth_red_mask = red_mask.filter(ImageFilter.GaussianBlur(1))
-    # smooth_green_mask = green_mask.filter(ImageFilter.GaussianBlur(1))
-    # smooth_blue_mask = blue_mask.filter(ImageFilter.GaussianBlur(1))
+    red_mask = red_mask.filter(ImageFilter.GaussianBlur(1))
+    green_mask = green_mask.filter(ImageFilter.GaussianBlur(1))
+    blue_mask = blue_mask.filter(ImageFilter.GaussianBlur(1))
 
     result = Image.composite(red_image, bnw_image, red_mask)
     result = Image.composite(green_image, result, green_mask)
