@@ -27,31 +27,30 @@ def apply_dracula(image):
         grayscale_image,
         dracula_theme["bg"],
         dracula_theme["fg"],
-        dracula_theme["alt_mid"],
+        dracula_theme["mid"],
         blackpoint=10,
-        midpoint=100,
     )
 
     red_image = ImageOps.colorize(
         grayscale_image,
-        dracula_theme["bg"],
-        dracula_theme["fg"],
+        dracula_theme["pink"],
+        dracula_theme["red"],
         dracula_theme["red"],
         blackpoint=10,
     )
 
     green_image = ImageOps.colorize(
         grayscale_image,
-        dracula_theme["bg"],
-        dracula_theme["fg"],
+        dracula_theme["orange"],
+        dracula_theme["green"],
         dracula_theme["green"],
         blackpoint=10,
     )
 
     blue_image = ImageOps.colorize(
         grayscale_image,
-        dracula_theme["bg"],
-        dracula_theme["fg"],
+        dracula_theme["purple"],
+        dracula_theme["cyan"],
         dracula_theme["cyan"],
         blackpoint=10,
     )
@@ -73,27 +72,46 @@ def apply_dracula(image):
             green_dominance = min(g - r, g - b)
             blue_dominance = min(b - r, b - g)
 
-            if red_dominance > 20 and r > 50:
-                red_mask_value = int(red_dominance * 1.5)
+            if red_dominance >= 20 and r >= 30:
+                red_mask_value = int(red_dominance * 1.2)
                 red_mask_pixels[x, y] = min(red_mask_value, 255)
 
-            if green_dominance > 20 and g > 50:
+            if green_dominance >= 20 and g >= 30:
                 green_mask_value = int(green_dominance * 1.5)
                 green_mask_pixels[x, y] = min(green_mask_value, 255)
 
-            if blue_dominance > 20 and b > 50:
-                blue_mask_value = int(blue_dominance * 1.5)
+            if blue_dominance >= 20 and b >= 30:
+                blue_mask_value = int(blue_dominance * 1.2)
                 blue_mask_pixels[x, y] = min(blue_mask_value, 255)
 
-    red_mask = red_mask.filter(ImageFilter.GaussianBlur(1))
-    green_mask = green_mask.filter(ImageFilter.GaussianBlur(1))
-    blue_mask = blue_mask.filter(ImageFilter.GaussianBlur(1))
+    red_mask = red_mask.filter(ImageFilter.GaussianBlur(3))
+    green_mask = green_mask.filter(ImageFilter.GaussianBlur(3))
+    blue_mask = blue_mask.filter(ImageFilter.GaussianBlur(3))
 
     result = Image.composite(red_image, bnw_image, red_mask)
     result = Image.composite(green_image, result, green_mask)
     result = Image.composite(blue_image, result, blue_mask)
 
     return result
+
+
+def apply_long(img):
+    width, height = img.size
+
+    if width < height // 9 * width:
+        long_image = Image.new("RGB", (height // 9 * 16, height), dracula_theme["bg"])
+    else:
+        long_image = Image.new("RGB", (width, width // 16 * 9), dracula_theme["bg"])
+    long_image_pixels = long_image.load()
+
+    image_pixels = img.load()
+
+    for y in range(height):
+        for x in range(width):
+            r, g, b = image_pixels[x, y]
+            long_image_pixels[x, y] = (r, g, b)
+
+    return long_image
 
 
 if __name__ == "__main__":
@@ -119,7 +137,8 @@ if __name__ == "__main__":
 
     try:
         image = Image.open(input_path)
-        result = apply_dracula(image)
+        img = apply_dracula(image)
+        result = apply_long(img)
         result.save(output_path, "PNG")
         print(f"Image saved to {output_path} successfully.")
     except Exception as error:
