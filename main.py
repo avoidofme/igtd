@@ -104,12 +104,16 @@ def apply_long(img):
         long_image = Image.new("RGB", (width, width // 16 * 9), dracula_theme["bg"])
     long_image_pixels = long_image.load()
 
+    long_width, long_height = long_image.size
+
     image_pixels = img.load()
+
+    startx, starty = (long_width - width) // 2, (long_height - height) // 2
 
     for y in range(height):
         for x in range(width):
             r, g, b = image_pixels[x, y]
-            long_image_pixels[x, y] = (r, g, b)
+            long_image_pixels[startx + x, starty + y] = (r, g, b)
 
     return long_image
 
@@ -138,7 +142,8 @@ if __name__ == "__main__":
     try:
         image = Image.open(input_path)
         img = apply_dracula(image)
-        result = apply_long(img)
+        result = apply_dracula(image)
+        # result = apply_long(img)
         result.save(output_path, "PNG")
         print(f"Image saved to {output_path} successfully.")
     except Exception as error:
