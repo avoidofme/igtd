@@ -4,17 +4,17 @@ import sys
 from PIL import Image, ImageFilter, ImageOps
 
 dracula_theme = {
-    "bg": (40, 42, 54),
-    "mid": (68, 71, 90),
-    "alt_mid": (98, 114, 164),
-    "fg": (248, 248, 242),
-    "cyan": (139, 233, 253),
-    "green": (80, 250, 123),
-    "orange": (255, 184, 108),
-    "pink": (255, 121, 198),
-    "purple": (189, 147, 249),
-    "red": (255, 85, 85),
-    "yellow": (241, 250, 140),
+    "bg":       (40, 42, 54),       # 282a36
+    "mid":      (68, 71, 90),       # 44475a
+    "alt_mid":  (98, 114, 164),     # 6272a4
+    "fg":       (248, 248, 242),    # f8f8f2
+    "cyan":     (139, 233, 253),    # 8be9fd
+    "green":    (80, 250, 123),     # 50fa7b
+    "orange":   (255, 184, 108),    # ffb86c
+    "pink":     (255, 121, 198),    # ff79c6
+    "purple":   (189, 147, 249),    # bd93f9
+    "red":      (255, 85, 85),      # ff5555
+    "yellow":   (241, 250, 140),    # f1fa8c
 }
 
 
@@ -98,15 +98,15 @@ def apply_dracula(image):
 def apply_long(img):
     width, height = img.size
 
-    if width < height // 9 * width:
+    if width < height // 9 * 16:
         long_image = Image.new("RGB", (height // 9 * 16, height), dracula_theme["bg"])
     else:
         long_image = Image.new("RGB", (width, width // 16 * 9), dracula_theme["bg"])
+
+    image_pixels = img.load()
     long_image_pixels = long_image.load()
 
     long_width, long_height = long_image.size
-
-    image_pixels = img.load()
 
     startx, starty = (long_width - width) // 2, (long_height - height) // 2
 
@@ -141,7 +141,7 @@ if __name__ == "__main__":
 
     try:
         image = Image.open(input_path)
-        img = apply_dracula(image)
+        # img = apply_dracula(image)
         result = apply_dracula(image)
         # result = apply_long(img)
         result.save(output_path, "PNG")
