@@ -71,7 +71,6 @@ func composite(fg, bg image.Image, mask *image.Gray) *image.RGBA {
 			fr, fg_, fb, fa := fColor.RGBA()
 			br, bg_, bb, ba := bColor.RGBA()
 
-			// Linear interpolation based on mask intensity (0.0 to 1.0)
 			outR := uint8((float64(fr>>8)*alpha + float64(br>>8)*(1-alpha)))
 			outG := uint8((float64(fg_>>8)*alpha + float64(bg_>>8)*(1-alpha)))
 			outB := uint8((float64(fb>>8)*alpha + float64(bb>>8)*(1-alpha)))
