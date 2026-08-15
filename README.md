@@ -1,22 +1,61 @@
+
 # igtd
 
-image goes to dracula. this is cli tool to convert existing image to dracula color.
+A high-performance Command Line Interface (CLI) utility written in Go that applies an automated Dracula theme color mapping profile over raw graphic assets. It isolates primary color channels (Red, Green, Blue dominance) using density masks and smooth blending calculations to deliver standard Dracula aesthetic profiles.
 
-## why
+## Features
 
-why not. btw you can edit the code for you to get result to your liking i don't care, i haven't found the thing i feel right either.
+- **Accurate Profile Mapping:** Replicates Python PIL-based image filters in native Go configurations.
+- **Smart Arguments:** Powered by Cobra for robust input verification and dynamic error handling.
+- **Auto Directory Resolution:** Automatically creates missing target folders and maps input names safely.
 
-## usage
+## Prerequisites
 
-zeroly clone this repo (or just copy the entire main.py) \
-firstly get python installed. \
-secondly install pillow, fr. \
-thirdly have that main.py
+Make sure you have [Go](https://go.dev) installed on your system.
+
+## Installation
+
+1. Clone or navigate to your local project directory.
+2. Install the tracking dependencies:
+
+   ```bash
+   go mod download
+   ```
+
+3. Compile the application binary layout target:
+
+   ```bash
+   go build -o igdt main.go
+   ```
+
+## Usage
+
+Run the compiled executable file directly from your terminal.
+
+### Basic Syntax
+
 ```bash
-# fourthly.
-python main.py <path to image> [optional output path]
+./igtd <path-to-image> [flags]
 ```
-fifthly.. `python main.py myimage.png` \
-sixthly get weird colored version of your image \
-seventhly check if it fits dracula color \
-eighthly star this repo or contribute or something vruh.
+
+### Examples
+
+**Process an image into the current directory:**
+*This creates an automatically prefixed file named `igdt_image.jpg` in your current folder.*
+
+```bash
+./igtd image.jpg
+```
+
+**Save the processed output directly into a specific file route:**
+
+```bash
+./igtd image.jpg -o output.jpg
+```
+
+**Output directly into a distinct folder path:**
+*If the directory does not exist, the tool automatically builds it for you.*
+
+```bash
+./igtd image.jpg ./output_folder
+```
